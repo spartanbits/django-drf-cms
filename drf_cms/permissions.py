@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from cms.shortcuts import get_current_site
+from .shortcuts import get_current_site
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
 

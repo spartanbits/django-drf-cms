@@ -3,7 +3,7 @@ from rest_framework import generics, mixins
 from .models import Text
 from .serializers import *
 from .permissions import IsOwnerOrReadOnly
-from cms.shortcuts import get_current_site
+from .shortcuts import get_current_site
 
 
 class TextView(
