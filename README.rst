@@ -1,6 +1,6 @@
-=====
+=========
 DRF-CMS
-=====
+=========
 
 DRF-CMS is a Django app to manage non-relational websites content in a restful way.
 Elements are key-value and linked to a page, letting the client decide how to compose them.
