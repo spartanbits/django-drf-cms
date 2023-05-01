@@ -22,6 +22,7 @@ class ContentMixin(models.Model):
 
 	class Meta:
 		unique_together = ('page', 'key')
+		abstract = True
 
 	def __str__(self):
 		return self.key
@@ -30,6 +31,9 @@ class ContentMixin(models.Model):
 class MetadataMixin(models.Model):
 	description = models.CharField(blank=True, max_length=512)
 	uploaded_at =  models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+		abstract = True
 
 	def __str__(self):
 		return self.description
