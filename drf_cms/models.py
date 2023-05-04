@@ -44,6 +44,10 @@ class ImageData(MetadataMixin):
 	height = models.PositiveIntegerField(default=0)
 	width = models.PositiveIntegerField(default=0)
 
+	@property
+	def url(self):
+		return self.file.url
+
 
 class FileData(MetadataMixin):
 	file = models.FileField()
@@ -55,6 +59,18 @@ class Text(ContentMixin):
 
 class Image(ContentMixin):
 	content = models.ForeignKey(ImageData, null=False, on_delete=models.PROTECT)
+
+	@property
+	def url(self):
+		return self.content.url
+
+	@property
+	def width(self):
+		return self.content.width
+
+	@property
+	def height(self):
+		return self.content.height
 
 
 class File(ContentMixin):

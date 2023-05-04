@@ -55,4 +55,4 @@ class FileDataSerializer(serializers.ModelSerializer):
 class ImageSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = ImageData
-		fields = ('file', 'id', 'description')
+		fields = ('url', 'id', 'description', 'width', 'height')
