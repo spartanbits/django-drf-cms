@@ -1,5 +1,8 @@
 from rest_framework import serializers
 from .models import Page, Text, FileData, ImageData
+import pathlib
+from django.conf import settings
+from urllib.parse import urlparse
 
 
 class TextSerializer(serializers.ModelSerializer):
