@@ -22,3 +22,8 @@ Quick start
 
 3. Run ``python manage.py migrate`` to create the cms models.
 
+
+Publish instructions:
+python setup.py sdist
+twine upload dist/*
+

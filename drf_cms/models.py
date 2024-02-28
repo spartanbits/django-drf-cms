@@ -1,6 +1,13 @@
 from django.db import models
 from django_bleach.models import BleachField
 from django.contrib.sites.models import Site
+from django.conf import settings
+from django.utils.html import mark_safe
+
+import pathlib
+from urllib.parse import urlparse
+
+from .mixins import *
 
 
 class Page(models.Model):
@@ -48,10 +55,37 @@ class ImageData(MetadataMixin):
 	def url(self):
 		return self.file.url
 
+	def preview(self):
+		return mark_safe(
+			'<div style="background-image: url(\'{0}\'); background-size: cover; background-position: center; width: 225px; height: 130px; margin: 5px 0;"></div>'.format(self.file.url))
+	
+	preview.short_description = 'Image preview'
+
 
 class FileData(MetadataMixin):
 	file = models.FileField()
 
+	def get_filename(self):
+		url = urlparse(self.file.url)
+		return pathlib.Path(url.path).stem
+
+	def get_base_url(self):
+		return 'https://{}.s3.amazonaws.com/{}'.format(
+				settings.AWS_STORAGE_VIDEO_BUCKET_NAME, self.get_filename())
+
+	def is_video(self):
+		return pathlib.Path(self.file.url).suffix.lower() == '.mp4'
+
+	def get_hls(self):
+		return '{}/HLS/{}.m3u8'.format(self.get_base_url(), self.get_filename())
+	
+	def get_thumbnail_at(self, index):
+		return '{}/Thumbnails/{}.000000{}.jpg'.format(
+			self.get_base_url(), self.get_filename(), index)
+
+	def preview(self):
+		return mark_safe(
+			'<div style="background-image: url(\'{0}\'); background-size: cover; background-position: center; width: 225px; height: 130px; margin: 5px 0;"></div>'.format(self.get_thumbnail_at(4)))
 
 class Text(ContentMixin):
 	content = BleachField(null=False, allowed_tags=['a', 'p', 'i', 'b', 'u'], allowed_attributes=['href'])

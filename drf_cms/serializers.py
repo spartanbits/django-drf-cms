@@ -39,17 +39,11 @@ class FileDataSerializer(serializers.ModelSerializer):
 	def get_extra(self, instance):
 		if not instance.file:
 			return None
-		if (pathlib.Path(instance.file.url).suffix.lower() == '.mp4'):
-			url = urlparse(instance.file.url)
-			filename = pathlib.Path(url.path).stem
-			base_url = 'https://{}.s3.amazonaws.com/{}'.format(
-				settings.AWS_STORAGE_VIDEO_BUCKET_NAME, filename)
+		if instance.is_video():
 			file = {
-				'hls': '{}/HLS/{}.m3u8'.format(base_url, filename),
-				'thumbnail': '{}/Thumbnails/{}.0000004.jpg'.format(
-								base_url, filename),
-				'thumbnail_fallback': '{}/Thumbnails/{}.0000002.jpg'.format(
-								base_url, filename)
+				'hls': instance.get_hls(),
+				'thumbnail': instance.get_thumbnail_at(4),
+				'thumbnail_fallback': instance.get_thumbnail_at(2)
 			}
 			return file
 		return None
