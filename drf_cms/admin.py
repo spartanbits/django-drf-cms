@@ -17,7 +17,7 @@ class TextAdmin(admin.ModelAdmin):
 
 @admin.register(FileData)
 class FileDataAdmin(admin.ModelAdmin):
-	list_display = ('id', 'file', 'description', 'uploaded_at',)
+	list_display = ('preview', 'file', 'description', 'uploaded_at',)
 	readonly_fields=['uploaded_at']
 	search_fields = ['description']
 	list_filter = ('description',)

@@ -85,7 +85,7 @@ class FileData(MetadataMixin):
 
 	def preview(self):
 		return mark_safe(
-			'<div style="background-image: url(\'{0}\'); background-size: cover; background-position: center; width: 225px; height: 130px; margin: 5px 0;"></div>'.format(self.get_thumbnail_at(4)))
+			'<div style="background-image: url(\'{0}\'); background-size: cover; background-position: center; width: 225px; height: 130px; margin: 5px 0;"></div>'.format(self.get_thumbnail_at(1)))
 
 class Text(ContentMixin):
 	content = BleachField(null=False, allowed_tags=['a', 'p', 'i', 'b', 'u'], allowed_attributes=['href'])
