@@ -9,7 +9,6 @@ from .models import Text, FileData, ImageData
 from .forms import ImageUpload
 from .serializers import *
 from .permissions import IsOwnerOrReadOnly
-from .shortcuts import get_current_site
 from .storage_backends import create_presigned_post
 
 
@@ -24,8 +23,8 @@ class TextView(
 
 	def get_queryset(self):
 		page_key = self.kwargs.get('page_key')
-		site = get_current_site(self.request)
-		return Text.objects.filter(page__key=page_key, page__site=site)
+		site_id = self.kwargs.get('site_id')
+		return Text.objects.filter(page__key=page_key, page__site__id=site_id)
 
 	def get(self, request, *args, **kwargs):
 		key = self.kwargs.get('key')
@@ -37,7 +36,6 @@ class TextView(
 		return self.partial_update(request, *args, **kwargs)
 
 
-
 class PageView(
 		mixins.ListModelMixin,
 		mixins.RetrieveModelMixin,
@@ -47,8 +45,8 @@ class PageView(
 	lookup_field = 'key'
 
 	def get_queryset(self):
-		site = get_current_site(self.request)
-		return Page.objects.filter(site=site)
+		site_id = self.kwargs.get('site_id')
+		return Page.objects.filter(site__id=site_id)
 
 	def get(self, request, *args, **kwargs):
 		key = self.kwargs.get('key')
@@ -58,61 +56,60 @@ class PageView(
 
 
 class FileUploadView(APIView):
-    permission_classes = [IsAdminUser]
-    parser_class = (FileUploadParser,)
+		permission_classes = [IsAdminUser]
+		parser_class = (FileUploadParser,)
 
-    def post(self, request, *args, **kwargs):
-      file = None
-      url = request.data.get('url', None)
-      description = request.data.get('description', '')
-      if url:
-        file = FileData.objects.create()
-        file.file.name = url.lower()
-        file.description = description
-        file.save()
-      else:
-        file_serializer = FileDataSerializer(data=request.data)
+		def post(self, request, *args, **kwargs):
+			file = None
+			url = request.data.get('url', None)
+			description = request.data.get('description', '')
+			if url:
+				file = FileData.objects.create()
+				file.file.name = url.lower()
+				file.description = description
+				file.save()
+			else:
+				file_serializer = FileDataSerializer(data=request.data)
 
-        if file_serializer.is_valid():
-            file = file_serializer.save()
-          
-      if file:
-          print(FileDataSerializer(file).data)
-          return Response(FileDataSerializer(file).data, status=status.HTTP_201_CREATED)
-      else:
-          return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+				if file_serializer.is_valid():
+						file = file_serializer.save()
+					
+			if file:
+					return Response(FileDataSerializer(file).data, status=status.HTTP_201_CREATED)
+			else:
+					return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SignedUrlView(APIView):
-    permission_classes = [IsAdminUser]
-    def get(self, request, *args, **kwargs):
-      filename = request.GET.get('filename', None)
-      if not filename:
-        return Response(
-          {'message': 'missing url param filename'}, 
-          status=status.HTTP_400_BAD_REQUEST)
-      
-      response = create_presigned_post(
-        settings.AWS_STORAGE_BUCKET_NAME, 
-        filename)
+		permission_classes = [IsAdminUser]
+		def get(self, request, *args, **kwargs):
+			filename = request.GET.get('filename', None)
+			if not filename:
+				return Response(
+					{'message': 'missing url param filename'}, 
+					status=status.HTTP_400_BAD_REQUEST)
+			
+			response = create_presigned_post(
+				settings.AWS_STORAGE_BUCKET_NAME, 
+				filename)
 
-      if not response:
-        return Response(
-          {'message': 'Error signing url'}, 
-          status=status.HTTP_503_SERVICE_UNAVAILABLE)
-      return Response(response, status=status.HTTP_200_OK)
+			if not response:
+				return Response(
+					{'message': 'Error signing url'}, 
+					status=status.HTTP_503_SERVICE_UNAVAILABLE)
+			return Response(response, status=status.HTTP_200_OK)
 
 
 class ImageUploadView(APIView):
-    parser_class = (FileUploadParser,)
+		parser_class = (FileUploadParser,)
 
-    def post(self, request, *args, **kwargs):
+		def post(self, request, *args, **kwargs):
 
-      file_serializer = ImageDataSerializer(data=request.data)
+			file_serializer = ImageDataSerializer(data=request.data)
 
-      if file_serializer.is_valid():
-        file_serializer.save()
-        return Response(file_serializer.data, status=status.HTTP_201_CREATED)
-      else:
-        return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+			if file_serializer.is_valid():
+				file_serializer.save()
+				return Response(file_serializer.data, status=status.HTTP_201_CREATED)
+			else:
+				return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

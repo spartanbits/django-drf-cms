@@ -1,5 +1,6 @@
 from rest_framework import permissions
-from .shortcuts import get_current_site
+
+#TODO: Add owner checks when site ownership is integrated to user
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
 
@@ -7,15 +8,10 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 		if request.method in permissions.SAFE_METHODS:
 			return True
 
-		site = get_current_site(request)
 		return (request.user.is_authenticated and request.user.is_staff)
 
 	def has_object_permission(self, request, view, obj):	
 		if request.method in permissions.SAFE_METHODS:
 			return True
 
-		site = get_current_site(request)
-		return site and request.user.is_staff and \
-			((hasattr(obj, 'site') and obj.site == site) \
-				or \
-			(hasattr(obj, 'page') and obj.page.site == site))
+		return (request.user.is_authenticated and request.user.is_staff)
